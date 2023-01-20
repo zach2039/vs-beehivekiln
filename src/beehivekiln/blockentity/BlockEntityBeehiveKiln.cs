@@ -128,8 +128,8 @@ namespace beehivekiln.blockentity
 			int i;
 			if (this.hotEnough)
 			{
-				Vec3d pos = this.Pos.ToVec3d().Add(0.0, -0.5d, 0.0);
-				Entity[] entitiesAround = this.Api.World.GetEntitiesAround(pos, 2.5f, 1f, (Entity e) => e.Alive && e is EntityAgent);
+				Vec3d pos = this.Pos.ToVec3d().Add(0.5, -2.5, 0.5);
+				Entity[] entitiesAround = this.Api.World.GetEntitiesAround(pos, 2.5f, 0.5f, (Entity e) => e.Alive && e is EntityAgent);
 				for (i = 0; i < entitiesAround.Length; i++)
 				{
 					entitiesAround[i].ReceiveDamage(new DamageSource
