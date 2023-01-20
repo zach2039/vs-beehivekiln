@@ -1,7 +1,7 @@
 {
 	ingredientPattern: "B_B,BCB,B_B",
 	ingredients: {
-		"C": { type: "item", code: "game:clay-fire" },
+		"C": { type: "item", code: "game:mortar" },
 		"B": { type: "item", code: "game:burnedbrick-fire", name: "type" }
 	},
 	width: 3,
