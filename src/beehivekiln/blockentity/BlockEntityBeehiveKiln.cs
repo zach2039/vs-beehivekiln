@@ -49,35 +49,51 @@ namespace beehivekiln.blockentity
 		public bool Interact(IPlayer byPlayer, bool preferThis)
 		{
 			bool sneaking = byPlayer.WorldData.EntityControls.ShiftKey;
-			int wrongTiles = 0;
-			int incompleteCount = 0;
+			int[] wrongTiles = new int[] { 0, 0, 0, 0 };
+			int[] incompleteCount = new int[] { 0, 0, 0, 0 };
+			int bestIdx = 0;
 			BlockPos posMain = this.Pos;
 			if (sneaking)
 			{
-				int wt = 0;
-				int ic = this.ms.InCompleteBlockCount(this.Api.World, this.Pos, delegate (Block haveBlock, AssetLocation wantLoc)
+				for (int i = 0; i < 4; i++)
+                {
+					int wt = 0;
+					int ic = this.msPossible[i].InCompleteBlockCount(this.Api.World, this.Pos, delegate (Block haveBlock, AssetLocation wantLoc)
+					{
+						int num;
+						num = wt;
+						wt = num + 1;
+					});
+					incompleteCount[i] = ic;
+					wrongTiles[i] = wt;
+				}
+
+				int icLast = int.MaxValue;
+				for (int i = 0; i < 4; i++)
+                {
+					if (incompleteCount[i] < icLast)
+                    {
+						icLast = incompleteCount[i];
+						bestIdx = i;
+                    }
+                }
+
+				if (incompleteCount[bestIdx] > 0)
 				{
-					int num;
-					num = wt;
-					wt = num + 1;
-				});
-				incompleteCount = ic;
-				wrongTiles = wt;
-				if (ic > 0)
-				{
-					this.msHighlighted = this.ms;
+					this.msHighlighted = this.msPossible[bestIdx];
 				}
 			}
-			if (sneaking && incompleteCount > 0)
+
+			if (sneaking && incompleteCount[bestIdx] > 0)
 			{
-				if (wrongTiles > 0)
+				if (wrongTiles[bestIdx] > 0)
 				{
 					ICoreClientAPI coreClientAPI2 = this.capi;
 					if (coreClientAPI2 != null)
 					{
 						coreClientAPI2.TriggerIngameError(this, "incomplete", Lang.Get("Structure is not complete, {0} blocks are missing or wrong!", new object[]
 						{
-							wrongTiles
+							wrongTiles[bestIdx]
 						}));
 					}
 				}
@@ -125,24 +141,6 @@ namespace beehivekiln.blockentity
 					}, 4f);
 				}
 			}
-
-			this.structureComplete = false;
-			this.incompleteBlockCount = this.ms.InCompleteBlockCount(this.Api.World, this.Pos, null);
-			if (this.incompleteBlockCount == 0)
-			{
-				this.structureComplete = true;
-			}
-			else
-			{
-				// Try and find a rotated structure for next attempt
-				rotY += 90;
-				this.ms.InitForUse(rotY);
-				this.progress = 0f;
-				this.processComplete = false;
-				this.tempKiln = this.EnvironmentTemperature();
-				base.MarkDirty(true, null);
-			}
-
 			i = this.tickCounter + 1;
 			this.tickCounter = i;
 			if (i % 3 == 0)
@@ -204,9 +202,26 @@ namespace beehivekiln.blockentity
 
 			GetHeatSourceDetails(fuelPilePos, ref this.fueled, ref temp);
 
-			this.incompleteBlockCount = this.ms.InCompleteBlockCount(this.Api.World, this.Pos, null);
-			if (this.incompleteBlockCount != 0)
+			MultiblockStructure msInUse = null;
+			this.structureComplete = false;
+			// Scan for suitable multiblock
+			for (int i = 0; i < 4; i++)
+            {
+				this.incompleteBlockCount = this.msPossible[i].InCompleteBlockCount(this.Api.World, this.Pos, null);
+				if (this.incompleteBlockCount == 0)
+                {
+					this.structureComplete = true;
+					msInUse = this.msPossible[i];
+					break;
+                }
+			}
+			
+			if (!this.structureComplete)
 			{
+				this.progress = 0f;
+				this.processComplete = false;
+				this.tempKiln = this.EnvironmentTemperature();
+				base.MarkDirty(true, null);
 				return;
 			}
 
@@ -351,9 +366,18 @@ namespace beehivekiln.blockentity
 			{
 				this.RegisterGameTickListener(new Action<float>(this.onServerTick1s), 1000, 0);
 			}
-			this.ms = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
-			this.rotY = 0;
-			this.ms.InitForUse((float)rotY);
+
+			// FIXME: This is bad
+			this.msPossible[BlockFacing.NORTH.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
+			this.msPossible[BlockFacing.EAST.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
+			this.msPossible[BlockFacing.SOUTH.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
+			this.msPossible[BlockFacing.WEST.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
+
+			this.msPossible[BlockFacing.NORTH.Index].InitForUse(0);
+			this.msPossible[BlockFacing.EAST.Index].InitForUse(90);
+			this.msPossible[BlockFacing.SOUTH.Index].InitForUse(180);
+			this.msPossible[BlockFacing.WEST.Index].InitForUse(270);
+
 			this.blockFbg = (base.Block as BlockFirebrickKilnFlue);
 			this.particlePositions[0] = this.Pos;
 			this.totalHoursLastUpdate = this.Api.World.Calendar.TotalHours;
@@ -370,7 +394,6 @@ namespace beehivekiln.blockentity
 			tree.SetInt("incompleteBlockCount", this.incompleteBlockCount);
 			tree.SetBool("fueled", this.fueled);
 			tree.SetInt("tempKiln", this.tempKiln);
-			tree.SetInt("rotY", this.rotY);
 		}
 
 		public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
@@ -384,7 +407,6 @@ namespace beehivekiln.blockentity
 			this.incompleteBlockCount = tree.GetInt("incompleteBlockCount", 0);
 			this.fueled = tree.GetBool("fueled", false);
 			this.tempKiln = tree.GetInt("tempKiln", 0);
-			this.rotY = tree.GetInt("rotY", 0);
 		}
 
 		public override void OnBlockRemoved()
@@ -492,7 +514,7 @@ namespace beehivekiln.blockentity
 			SelfPropelled = true
 		};
 
-		private MultiblockStructure ms;
+		private MultiblockStructure[] msPossible = new MultiblockStructure[4];
 
 		private MultiblockStructure msHighlighted;
 
