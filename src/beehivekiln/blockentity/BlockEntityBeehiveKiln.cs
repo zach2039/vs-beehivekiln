@@ -465,7 +465,6 @@ namespace beehivekiln.blockentity
 			if (!this.structureComplete)
 			{
 				dsc.AppendLine(Lang.Get("Structure incomplete! Firing progress is reset.", Array.Empty<object>()));
-				dsc.AppendLine(Lang.Get("Incomplete blocks: {0}", new object[] { (int)(this.incompleteBlockCount) }));
 				appendInfo(dsc);
 				return;
 			}
