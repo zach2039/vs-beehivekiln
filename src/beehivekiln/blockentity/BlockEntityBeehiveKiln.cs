@@ -220,6 +220,7 @@ namespace beehivekiln.blockentity
 			{
 				this.progress = 0f;
 				this.processComplete = false;
+				this.hotEnough = false;
 				this.tempKiln = this.EnvironmentTemperature();
 				base.MarkDirty(true, null);
 				return;
