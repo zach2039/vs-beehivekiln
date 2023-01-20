@@ -125,6 +125,24 @@ namespace beehivekiln.blockentity
 					}, 4f);
 				}
 			}
+
+			this.structureComplete = false;
+			this.incompleteBlockCount = this.ms.InCompleteBlockCount(this.Api.World, this.Pos, null);
+			if (this.incompleteBlockCount == 0)
+			{
+				this.structureComplete = true;
+			}
+			else
+			{
+				// Try and find a rotated structure for next attempt
+				rotY += 90;
+				this.ms.InitForUse(rotY);
+				this.progress = 0f;
+				this.processComplete = false;
+				this.tempKiln = this.EnvironmentTemperature();
+				base.MarkDirty(true, null);
+			}
+
 			i = this.tickCounter + 1;
 			this.tickCounter = i;
 			if (i % 3 == 0)
@@ -186,18 +204,9 @@ namespace beehivekiln.blockentity
 
 			GetHeatSourceDetails(fuelPilePos, ref this.fueled, ref temp);
 
-			this.structureComplete = false;
 			this.incompleteBlockCount = this.ms.InCompleteBlockCount(this.Api.World, this.Pos, null);
-			if (this.incompleteBlockCount == 0)
+			if (this.incompleteBlockCount != 0)
 			{
-				this.structureComplete = true;
-			}
-			else
-			{
-				this.progress = 0f;
-				this.processComplete = false;
-				this.tempKiln = this.EnvironmentTemperature();
-				base.MarkDirty(true, null);
 				return;
 			}
 
@@ -343,8 +352,8 @@ namespace beehivekiln.blockentity
 				this.RegisterGameTickListener(new Action<float>(this.onServerTick1s), 1000, 0);
 			}
 			this.ms = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
-			int rotYDeg = 0;
-			this.ms.InitForUse((float)rotYDeg);
+			this.rotY = 0;
+			this.ms.InitForUse((float)rotY);
 			this.blockFbg = (base.Block as BlockFirebrickKilnFlue);
 			this.particlePositions[0] = this.Pos;
 			this.totalHoursLastUpdate = this.Api.World.Calendar.TotalHours;
@@ -361,6 +370,7 @@ namespace beehivekiln.blockentity
 			tree.SetInt("incompleteBlockCount", this.incompleteBlockCount);
 			tree.SetBool("fueled", this.fueled);
 			tree.SetInt("tempKiln", this.tempKiln);
+			tree.SetInt("rotY", this.rotY);
 		}
 
 		public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
@@ -374,6 +384,7 @@ namespace beehivekiln.blockentity
 			this.incompleteBlockCount = tree.GetInt("incompleteBlockCount", 0);
 			this.fueled = tree.GetBool("fueled", false);
 			this.tempKiln = tree.GetInt("tempKiln", 0);
+			this.rotY = tree.GetInt("rotY", 0);
 		}
 
 		public override void OnBlockRemoved()
@@ -506,6 +517,8 @@ namespace beehivekiln.blockentity
 		private bool fueled;
 
 		private int tempKiln;
+
+		private int rotY;
 
 		private BlockPos[] particlePositions = new BlockPos[1];
 	}

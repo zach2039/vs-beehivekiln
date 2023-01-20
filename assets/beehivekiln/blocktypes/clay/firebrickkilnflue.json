@@ -10,7 +10,7 @@
 			blockNumbers: {
 				"beehivekiln:firebrickkilnflue": 1,
 				"game:claybricks-fire": 2,
-				"beehivekiln:firebrickgrating": 3,
+				"beehivekiln:firebrickgrating": 3
 			},
 			offsets: [
 				{ x: 0, y: -3, z: 0, w: 3 },
