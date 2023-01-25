@@ -4,9 +4,9 @@
   "name": "Beehive Kiln",
   "authors": ["Zach2039"],
   "description": "Adds a mutli-block kiln for mass pottery firing after pit kilns.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "dependencies": {
-    "game": "1.17.*"
+    "game": "1.17.0"
   },
   "Side": "Universal",
   "RequiredOnClient": true,
