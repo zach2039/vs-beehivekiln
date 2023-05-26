@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<AssemblyTitle>VintageMinecarts</AssemblyTitle>
+		<AssemblyTitle>beehivekiln</AssemblyTitle>
 		<Authors>Zach2039</Authors>
-		<Version>0.0.1</Version>
+		<Version>1.2.2</Version>
 		<TargetFramework>net461</TargetFramework>
 	</PropertyGroup>
 	
