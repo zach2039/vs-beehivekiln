@@ -540,8 +540,6 @@ namespace beehivekiln.blockentity
 
 		private int tempKiln;
 
-		private int rotY;
-
 		private BlockPos[] particlePositions = new BlockPos[1];
 	}
 }
