@@ -4,6 +4,7 @@
  - Move to VSCode for linux ease of development
  - Fix changelog versioning
  - Swap to CC-BY license
+ - Update to 1.18.5
 
 ### v1.17.9-1.2.1
 
