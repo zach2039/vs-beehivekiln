@@ -474,7 +474,7 @@ namespace beehivekiln.blockentity
 			else
 			{
 				dsc.AppendLine(Lang.Get("Kiln temperature is too cold! Must be {0}°C or hotter.", new object[] { this.MinKilnTemperature }));
-				dsc.AppendLine(Lang.Get("Ignite a pile of wood under the center grate of the kiln.", Array.Empty<object>()));
+				dsc.AppendLine(Lang.Get("Ignite a firepit under the center grate of the kiln.", Array.Empty<object>()));
 				appendInfo(dsc);
 			}
 			if (this.progress > 0.0)
