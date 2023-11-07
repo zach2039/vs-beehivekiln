@@ -6,3 +6,4 @@
 *.opendb
 *.db-wal
 *.db-shm
+.vs/
