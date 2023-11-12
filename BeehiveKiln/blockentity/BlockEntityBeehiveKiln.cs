@@ -30,7 +30,7 @@ namespace beehivekiln.blockentity
 			get
             {
 				//return 500;
-				return BeehiveKilnConfig.MinimumFiringTemperatureCelsius;
+				return BeehiveKilnConfig.Loaded.MinimumFiringTemperatureCelsius;
 			}
         }
 
@@ -227,7 +227,7 @@ namespace beehivekiln.blockentity
 			if (Math.Abs((float)this.tempKiln - temp) > 25f)
 			{
 				//float tempGain = (float)(250 * hoursPassed);
-				float tempGain = (float)(BeehiveKilnConfig.TemperatureGainPerHourCelsius * hoursPassed);
+				float tempGain = (float)(BeehiveKilnConfig.Loaded.TemperatureGainPerHourCelsius * hoursPassed);
 				if (this.tempKiln > temp)
 				{
 					this.tempKiln = (int)Math.Max(this.tempKiln - tempGain, temp);
@@ -262,7 +262,7 @@ namespace beehivekiln.blockentity
 			if (this.hotEnough)
 			{
 				//this.progress += hoursPassed / 6.0;
-				this.progress += hoursPassed / BeehiveKilnConfig.FiringTimeHours;
+				this.progress += hoursPassed / BeehiveKilnConfig.Loaded.FiringTimeHours;
 				base.MarkDirty(true, null);
 			}
 

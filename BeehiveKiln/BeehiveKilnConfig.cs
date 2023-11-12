@@ -1,6 +1,3 @@
-using beehivekiln.block;
-using beehivekiln.blockentity;
-using Vintagestory.API.Common;
 
 namespace beehivekiln
 {

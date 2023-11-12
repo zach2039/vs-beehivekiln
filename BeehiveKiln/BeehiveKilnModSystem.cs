@@ -1,14 +1,19 @@
-﻿using beehivekiln.block;
+﻿using beehivekiln;
+using beehivekiln.block;
 using beehivekiln.blockentity;
+using beehivekiln.network;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Server;
 
 namespace beehivekiln
 {
     class BeehiveKilnCore : ModSystem
     {
         private IServerNetworkChannel serverChannel;
+        private ICoreAPI api;
 
-        pubkic override void StartPre(ICoreAPI api)
+        public override void StartPre(ICoreAPI api)
         {
             string cfgFileName = "BeehiveKiln.json";
 
@@ -34,12 +39,34 @@ namespace beehivekiln
 
         public override void Start(ICoreAPI api)
         {
+            this.api = api;
             base.Start(api);
 
             api.Logger.Notification("Loaded Beehive Kiln!");
 
             api.RegisterBlockClass("BlockFirebrickKilnFlue", typeof(BlockFirebrickKilnFlue));
             api.RegisterBlockEntityClass("BlockEntityBeehiveKiln", typeof(BlockEntityBeehiveKiln));
+        }
+
+        private void OnPlayerJoin(IServerPlayer player)
+        {
+            // Send connecting players config settings
+            this.serverChannel.SendPacket(
+                new SyncConfigClientPacket {
+                    FiringTimeHours = BeehiveKilnConfig.Loaded.FiringTimeHours,
+                    MinimumFiringTemperatureCelsius = BeehiveKilnConfig.Loaded.MinimumFiringTemperatureCelsius, 
+                    TemperatureGainPerHourCelsius = BeehiveKilnConfig.Loaded.TemperatureGainPerHourCelsius
+                }, player);
+        }
+
+        public override void StartServerSide(ICoreServerAPI sapi)
+        {
+            sapi.Event.PlayerJoin += this.OnPlayerJoin; 
+            
+            // Create server channel for config data sync
+            this.serverChannel = sapi.Network.RegisterChannel("beehivekiln")
+                .RegisterMessageType<SyncConfigClientPacket>()
+                .SetMessageHandler<SyncConfigClientPacket>((player, packet) => {});
         }
 
         public override void StartClientSide(ICoreClientAPI capi)
@@ -49,20 +76,18 @@ namespace beehivekiln
                 .RegisterMessageType<SyncConfigClientPacket>()
                 .SetMessageHandler<SyncConfigClientPacket>(p => {
                     this.Mod.Logger.Event("Received config settings from server");
-                    BeehiveModConfig.Loaded.FiringTimeHours = p.FiringTimeHours;
-                    BeehiveModConfig.Loaded.MinimumFiringTemperatureCelsius = p.MinimumFiringTemperatureCelsius;
-                    BeehiveModConfig.Loaded.TemperatureGainPerHourCelsius = p.TemperatureGainPerHourCelsius;
+                    BeehiveKilnConfig.Loaded.FiringTimeHours = p.FiringTimeHours;
+                    BeehiveKilnConfig.Loaded.MinimumFiringTemperatureCelsius = p.MinimumFiringTemperatureCelsius;
+                    BeehiveKilnConfig.Loaded.TemperatureGainPerHourCelsius = p.TemperatureGainPerHourCelsius;
                 });
         }
-
-        private void OnPlayerJoin(IServerPlayer player)
+        
+        public override void Dispose()
         {
-            // Send connecting players config settings
-            this.serverChannel.SendPacket(new SyncConfigClientPacket {
-                FiringTimeHours = ModConfig.Loaded.FiringTimeHours;
-                MinimumFiringTemperatureCelsius = ModConfig.Loaded.MinimumFiringTemperatureCelsius;
-                TemperatureGainPerHourCelsius = ModConfig.Loaded.TemperatureGainPerHourCelsius;
-            }, player);
+            if (this.api is ICoreServerAPI sapi)
+            {
+                sapi.Event.PlayerJoin -= this.OnPlayerJoin;
+            }
         }
     }
 }
