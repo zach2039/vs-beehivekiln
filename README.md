@@ -18,6 +18,16 @@ Quick-start Guide
 4. After firing completes, break open the kiln to get your fired items.
 
 
+Config Settings in `VintageStoryData/ModConfig/BeehiveKiln.json`
+--------
+
+ - FiringTimeHours: How long a firing process takes to complete once at minimum temp, in hours; defaults to `6.0`.
+
+ - MinimumFiringTemperatureCelsius: The minimum temperature the kiln must reach to start and/or continue firing, in celsius; defaults to `500`.
+  
+ - TemperatureGainPerHourCelsius: How much kiln temperature can increase per hour, in celsius; defaults to `250`.
+
+
 Future Plans
 --------
 
