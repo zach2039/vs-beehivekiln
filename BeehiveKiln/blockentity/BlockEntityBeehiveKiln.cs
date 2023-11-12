@@ -29,7 +29,8 @@ namespace beehivekiln.blockentity
         {
 			get
             {
-				return 500;
+				//return 500;
+				return BeehiveKilnConfig.MinimumFiringTemperatureCelsius;
 			}
         }
 
@@ -147,7 +148,7 @@ namespace beehivekiln.blockentity
 		}
 
 		/// <summary>
-		/// Passes fueled values and burn temperature of heat source, whether it be a coal pile or fire pit.
+		/// Passes fueled values and burn temperature of a fire pit heat source.
 		/// </summary>
 		/// <param name="pos">position of possible heat source</param>
 		/// <returns></returns>
@@ -225,7 +226,8 @@ namespace beehivekiln.blockentity
 
 			if (Math.Abs((float)this.tempKiln - temp) > 25f)
 			{
-				float tempGain = (float)(250 * hoursPassed);
+				//float tempGain = (float)(250 * hoursPassed);
+				float tempGain = (float)(BeehiveKilnConfig.TemperatureGainPerHourCelsius * hoursPassed);
 				if (this.tempKiln > temp)
 				{
 					this.tempKiln = (int)Math.Max(this.tempKiln - tempGain, temp);
@@ -259,7 +261,8 @@ namespace beehivekiln.blockentity
 
 			if (this.hotEnough)
 			{
-				this.progress += hoursPassed / 6.0;
+				//this.progress += hoursPassed / 6.0;
+				this.progress += hoursPassed / BeehiveKilnConfig.FiringTimeHours;
 				base.MarkDirty(true, null);
 			}
 
