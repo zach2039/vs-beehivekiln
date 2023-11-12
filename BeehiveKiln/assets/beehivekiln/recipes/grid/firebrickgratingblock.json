@@ -1,10 +1,21 @@
 {
-	ingredientPattern: "B_B,BCB,B_B",
-	ingredients: {
-		"C": { type: "item", code: "game:mortar" },
-		"B": { type: "item", code: "game:burnedbrick-fire", name: "type" }
+	"ingredientPattern":"B_B,BCB,B_B",
+	"ingredients":{
+		"C":{
+			"type":"item",
+			"code":"game:mortar"
+		},
+		"B":{
+			"type":"item",
+			"code":"game:burnedbrick-fire",
+			"name":"type"
+		}
 	},
-	width: 3,
-	height: 3,
-	output: { type: "block", code: "beehivekiln:firebrickgrating", quantity: 3 }
+	"width":3,
+	"height":3,
+	"output":{
+		"type":"block",
+		"code":"beehivekiln:firebrickgrating",
+		"quantity":3
+	}
 }
