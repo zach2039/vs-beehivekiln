@@ -1,5 +1,6 @@
 ﻿using beehivekiln.block;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -47,16 +48,16 @@ namespace beehivekiln.blockentity
 		public bool Interact(IPlayer byPlayer, bool preferThis)
 		{
 			bool sneaking = byPlayer.WorldData.EntityControls.ShiftKey;
-			int[] wrongTiles = new int[] { 0, 0, 0, 0 };
-			int[] incompleteCount = new int[] { 0, 0, 0, 0 };
+			int[] wrongTiles = new int[this.msPossibleList.Count];
+			int[] incompleteCount = new int[this.msPossibleList.Count];
 			int bestIdx = 0;
 			BlockPos posMain = this.Pos;
 			if (sneaking)
 			{
-				for (int i = 0; i < 4; i++)
+				for (int i = 0; i < this.msPossibleList.Count; i++)
                 {
 					int wt = 0;
-					int ic = this.msPossible[i].InCompleteBlockCount(this.Api.World, this.Pos, delegate (Block haveBlock, AssetLocation wantLoc)
+					int ic = this.msPossibleList[i].InCompleteBlockCount(this.Api.World, this.Pos, delegate (Block haveBlock, AssetLocation wantLoc)
 					{
 						int num;
 						num = wt;
@@ -67,7 +68,7 @@ namespace beehivekiln.blockentity
 				}
 
 				int icLast = int.MaxValue;
-				for (int i = 0; i < 4; i++)
+				for (int i = 0; i < this.msPossibleList.Count; i++)
                 {
 					if (incompleteCount[i] < icLast)
                     {
@@ -78,7 +79,7 @@ namespace beehivekiln.blockentity
 
 				if (incompleteCount[bestIdx] > 0)
 				{
-					this.msHighlighted = this.msPossible[bestIdx];
+					this.msHighlighted = this.msPossibleList[bestIdx];
 				}
 			}
 
@@ -203,13 +204,13 @@ namespace beehivekiln.blockentity
 			MultiblockStructure msInUse = null;
 			this.structureComplete = false;
 			// Scan for suitable multiblock
-			for (int i = 0; i < 4; i++)
+			foreach (MultiblockStructure msPossible in this.msPossibleList)
             {
-				this.incompleteBlockCount = this.msPossible[i].InCompleteBlockCount(this.Api.World, this.Pos, null);
+				this.incompleteBlockCount = msPossible.InCompleteBlockCount(this.Api.World, this.Pos, null);
 				if (this.incompleteBlockCount == 0)
                 {
 					this.structureComplete = true;
-					msInUse = this.msPossible[i];
+					msInUse = msPossible;
 					break;
                 }
 			}
@@ -368,16 +369,34 @@ namespace beehivekiln.blockentity
 				this.RegisterGameTickListener(new Action<float>(this.onServerTick1s), 1000, 0);
 			}
 
-			// FIXME: This is bad
-			this.msPossible[BlockFacing.NORTH.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
-			this.msPossible[BlockFacing.EAST.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
-			this.msPossible[BlockFacing.SOUTH.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
-			this.msPossible[BlockFacing.WEST.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
+			// Get each multiblock defined in attributes, and rotate them around to get 4 versions of it for later checking
+			foreach (JsonObject msPossible in base.Block.Attributes["multiblockStructures"].AsArray())
+			{
+				MultiblockStructure msNorth = msPossible.AsObject<MultiblockStructure>(null);
+				MultiblockStructure msEast = msPossible.AsObject<MultiblockStructure>(null);
+				MultiblockStructure msSouth = msPossible.AsObject<MultiblockStructure>(null);
+				MultiblockStructure msWest = msPossible.AsObject<MultiblockStructure>(null);
 
-			this.msPossible[BlockFacing.NORTH.Index].InitForUse(0);
-			this.msPossible[BlockFacing.EAST.Index].InitForUse(90);
-			this.msPossible[BlockFacing.SOUTH.Index].InitForUse(180);
-			this.msPossible[BlockFacing.WEST.Index].InitForUse(270);
+				msNorth.InitForUse(0);
+				msEast.InitForUse(90);
+				msSouth.InitForUse(180);
+				msWest.InitForUse(270);
+
+				this.msPossibleList.Add(msNorth);
+				this.msPossibleList.Add(msEast);
+				this.msPossibleList.Add(msSouth);
+				this.msPossibleList.Add(msWest);
+			}
+
+			//this.msPossibleList[BlockFacing.NORTH.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
+			//this.msPossibleList[BlockFacing.EAST.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
+			//this.msPossibleList[BlockFacing.SOUTH.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
+			//this.msPossibleList[BlockFacing.WEST.Index] = base.Block.Attributes["multiblockStructure"].AsObject<MultiblockStructure>(null);
+
+			//this.msPossibleList[BlockFacing.NORTH.Index].InitForUse(0);
+			//this.msPossibleList[BlockFacing.EAST.Index].InitForUse(90);
+			//this.msPossibleList[BlockFacing.SOUTH.Index].InitForUse(180);
+			//this.msPossibleList[BlockFacing.WEST.Index].InitForUse(270);
 
 			this.blockFbg = (base.Block as BlockFirebrickKilnFlue);
 			this.particlePositions[0] = this.Pos;
@@ -514,7 +533,7 @@ namespace beehivekiln.blockentity
 			SelfPropelled = true
 		};
 
-		private MultiblockStructure[] msPossible = new MultiblockStructure[4];
+		private List<MultiblockStructure> msPossibleList = new List<MultiblockStructure>();
 
 		private MultiblockStructure msHighlighted;
 
