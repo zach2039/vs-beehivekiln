@@ -1,4 +1,5 @@
 ﻿using beehivekiln.block;
+using beehivekiln.util;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -230,12 +231,12 @@ namespace beehivekiln.blockentity
 				this.progress = 0f;
 				this.processComplete = false;
 				this.hotEnough = false;
-				// Breaking the structure used to instantly remove heat, though now that walkable
-				// kilns are a thing, we need to be more punishing. Incomplete structure now just 
-				// cools down 3 times as fast to ambient temp.
-				//this.tempKiln = this.EnvironmentTemperature();
-				float tempLoss = (float)(BeehiveKilnConfig.Loaded.TemperatureGainPerHourCelsius * hoursPassed) * 3;
-				this.tempKiln = (int)Math.Min(this.tempKiln - tempLoss, this.EnvironmentTemperature());
+				// FIXME: Breaking the structure right now instantly removes heat, though now that walkable
+				// kilns are a thing, we need to be more punishing. Incomplete structures cool down 
+				// 8 times as fast to ambient temp when.
+				//float tempLoss = (float)(BeehiveKilnConfig.Loaded.TemperatureGainPerHourCelsius * hoursPassed) * 8;
+				//this.tempKiln = (int)Math.Max(this.tempKiln - tempLoss, this.EnvironmentTemperature());
+				this.tempKiln = this.EnvironmentTemperature();
 				base.MarkDirty(true, null);
 				return;
 			}
@@ -370,6 +371,7 @@ namespace beehivekiln.blockentity
 				}
 			}
 		}
+
 		public override void Initialize(ICoreAPI api)
 		{
 			base.Initialize(api);
@@ -391,6 +393,15 @@ namespace beehivekiln.blockentity
 				MultiblockStructure msEast = msPossible.AsObject<MultiblockStructure>(null);
 				MultiblockStructure msSouth = msPossible.AsObject<MultiblockStructure>(null);
 				MultiblockStructure msWest = msPossible.AsObject<MultiblockStructure>(null);
+
+				// Since InitForUse does not rotate blocks with direction codes properly, we need to 
+				// change them manually for east and west directions
+
+				// This also needs to be done before InitForUse, since BlockNumbers will be copied to private BlockCodes in structure instance
+				ModBlockCodeHelper.ReplaceBlockCodeInMultiblockStructure(ref msEast, new AssetLocation("*-north-*"), new AssetLocation("*-east-*"));
+				ModBlockCodeHelper.ReplaceBlockCodeInMultiblockStructure(ref msEast, new AssetLocation("*-south-*"), new AssetLocation("*-west-*"));
+				ModBlockCodeHelper.ReplaceBlockCodeInMultiblockStructure(ref msWest, new AssetLocation("*-north-*"), new AssetLocation("*-east-*"));
+				ModBlockCodeHelper.ReplaceBlockCodeInMultiblockStructure(ref msWest, new AssetLocation("*-south-*"), new AssetLocation("*-west-*"));
 
 				msNorth.InitForUse(0);
 				msEast.InitForUse(90);
