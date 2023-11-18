@@ -230,7 +230,12 @@ namespace beehivekiln.blockentity
 				this.progress = 0f;
 				this.processComplete = false;
 				this.hotEnough = false;
-				this.tempKiln = this.EnvironmentTemperature();
+				// Breaking the structure used to instantly remove heat, though now that walkable
+				// kilns are a thing, we need to be more punishing. Incomplete structure now just 
+				// cools down 3 times as fast to ambient temp.
+				//this.tempKiln = this.EnvironmentTemperature();
+				float tempLoss = (float)(BeehiveKilnConfig.Loaded.TemperatureGainPerHourCelsius * hoursPassed) * 3;
+				this.tempKiln = (int)Math.Min(this.tempKiln - tempLoss, this.EnvironmentTemperature());
 				base.MarkDirty(true, null);
 				return;
 			}
