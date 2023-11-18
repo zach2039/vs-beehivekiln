@@ -2,6 +2,7 @@
 
 * Refactor block entity logic to support small and large kilns
 * Add new multiblock with iron door access
+* Rebalance total firing time to 12 hours in order to better match fuel input of equivalent pit kilns
 
 ### v1.4.0
 
