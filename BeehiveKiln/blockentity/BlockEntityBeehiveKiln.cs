@@ -152,8 +152,8 @@ namespace beehivekiln.blockentity
 		/// Passes fueled values and burn temperature of a fire pit heat source.
 		/// </summary>
 		/// <param name="pos">position of possible heat source</param>
-		/// <returns></returns>
-		private void GetHeatSourceDetails(BlockPos pos, ref bool isFueled, ref int temperature)
+		/// <returns>true if firepit at pos, false otherwise</returns>
+		private bool GetHeatSourceDetails(BlockPos pos, ref bool isFueled, ref int temperature)
         {
 			BlockEntity fuelPileBlock = this.Api.World.BlockAccessor.GetBlockEntity(pos);
 			if (fuelPileBlock != null)
@@ -180,17 +180,27 @@ namespace beehivekiln.blockentity
 						isFueled = true;
 					}
 				}
+				return true;
+			}
+			else
+			{
+				return false;
 			}
 		}
 
 		private void onServerTick3s(float dt)
 		{
-			BlockPos fuelPilePos = this.Pos.DownCopy(4);
 			bool beforeHotEnough = this.hotEnough;
 			bool beforeStructureComplete = this.structureComplete;
 			int temp = this.EnvironmentTemperature();
 			this.fueled = false;
-			
+
+			// Check for small or large kiln based on where grating is under flue
+			// This dictates where heat source will be searched for, as well as locations of raw and fired clay stuff
+			bool isSmallKiln = this.Api.World.BlockAccessor.GetBlock(this.Pos.DownCopy(3)).Code.ToString().Contains("firebrickgrating");
+
+			BlockPos fuelPilePos = (isSmallKiln) ? this.Pos.DownCopy(4) : this.Pos.DownCopy(5);
+
 			if (beforeStructureComplete != this.structureComplete)
             {
 				this.totalHoursLastUpdate = this.Api.World.Calendar.TotalHours;
@@ -274,7 +284,7 @@ namespace beehivekiln.blockentity
                 {
 					for (int z = -1; z < 2; z++)
                     {
-						BlockPos unfiredBlockPos = this.Pos.AddCopy(x, -2, z);
+						BlockPos unfiredBlockPos = this.Pos.AddCopy(x, (isSmallKiln) ? -2 : -3, z);
 						BlockEntityGroundStorage beg = this.Api.World.BlockAccessor.GetBlockEntity(unfiredBlockPos) as BlockEntityGroundStorage;
 						if (beg != null)
                         {
