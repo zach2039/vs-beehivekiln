@@ -1,3 +1,8 @@
+### v1.5.0
+
+* Refactor block entity logic to support small and large kilns
+* Add new multiblock with iron door access
+
 ### v1.4.0
 
 * Add initial mod config and sync packets
