@@ -389,10 +389,10 @@ namespace beehivekiln.blockentity
 			// Get each multiblock defined in attributes, and rotate them around to get 4 versions of it for later checking
 			foreach (JsonObject msPossible in base.Block.Attributes["multiblockStructures"].AsArray())
 			{
-				MultiblockStructure msNorth = msPossible.AsObject<MultiblockStructure>(null);
-				MultiblockStructure msEast = msPossible.AsObject<MultiblockStructure>(null);
-				MultiblockStructure msSouth = msPossible.AsObject<MultiblockStructure>(null);
-				MultiblockStructure msWest = msPossible.AsObject<MultiblockStructure>(null);
+				MultiblockStructure msNorth = msPossible.AsObject<MultiblockStructure>(null); // will use default door directions
+				MultiblockStructure msEast = msPossible.AsObject<MultiblockStructure>(null); // will use rotated door directions
+				MultiblockStructure msSouth = msPossible.AsObject<MultiblockStructure>(null); // will use default door directions
+				MultiblockStructure msWest = msPossible.AsObject<MultiblockStructure>(null); // will use rotated door directions
 
 				// Since InitForUse does not rotate blocks with direction codes properly, we need to 
 				// change them manually for east and west directions

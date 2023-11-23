@@ -12,8 +12,8 @@
 			{
 				"blockNumbers":{
 					"game:claybricks-fire":1,
-					"game:irondoor-south-up-closed-left":2,
-					"game:irondoor-south-down-closed-left":3,
+					"game:irondoor-south-up-closed-*":2,
+					"game:irondoor-south-down-closed-*":3,
 					"beehivekiln:firebrickkilnflue":4,
 					"beehivekiln:firebrickgrating":5
 				},
@@ -323,8 +323,8 @@
 			{
 				"blockNumbers":{
 					"game:claybricks-fire":1,
-					"game:irondoor-north-up-closed-left":2,
-					"game:irondoor-north-down-closed-left":3,
+					"game:irondoor-north-up-closed-*":2,
+					"game:irondoor-north-down-closed-*":3,
 					"beehivekiln:firebrickkilnflue":4,
 					"beehivekiln:firebrickgrating":5
 				},
