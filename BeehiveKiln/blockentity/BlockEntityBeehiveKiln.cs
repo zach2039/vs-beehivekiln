@@ -290,38 +290,43 @@ namespace beehivekiln.blockentity
                 {
 					for (int z = -1; z < 2; z++)
                     {
-						BlockPos unfiredBlockPos = this.Pos.AddCopy(x, (isSmallKiln) ? -2 : -3, z);
-						BlockEntityGroundStorage beg = this.Api.World.BlockAccessor.GetBlockEntity(unfiredBlockPos) as BlockEntityGroundStorage;
-						if (beg != null)
-                        {
-							// More or less taken from pit kiln code
-							for (int i = 0; i < 4; i++)
-                            {
-								ItemSlot slot = beg.Inventory[i];
-								if (!slot.Empty)
+						// Fire 2 levels for big kiln, 1 for small kiln
+						int max_depth = (isSmallKiln) ? -2 : -3;
+						for (int y = -2; y >= max_depth; y--)
+						{
+							BlockPos unfiredBlockPos = this.Pos.AddCopy(x, y, z);
+							BlockEntityGroundStorage beg = this.Api.World.BlockAccessor.GetBlockEntity(unfiredBlockPos) as BlockEntityGroundStorage;
+							if (beg != null)
+							{
+								// More or less taken from pit kiln code
+								for (int i = 0; i < 4; i++)
 								{
-									ItemStack rawStack = slot.Itemstack;
-									CombustibleProperties combustibleProps = rawStack.Collectible.CombustibleProps;
-									ItemStack itemStack;
-									if (combustibleProps == null)
+									ItemSlot slot = beg.Inventory[i];
+									if (!slot.Empty)
 									{
-										itemStack = null;
-									}
-									else
-									{
-										JsonItemStack smeltedStack = combustibleProps.SmeltedStack;
-										itemStack = (smeltedStack != null) ? smeltedStack.ResolvedItemstack : null;
-									}
-									ItemStack firedStack = itemStack;
-									if (firedStack != null)
-									{
-										slot.Itemstack = firedStack.Clone();
-										slot.Itemstack.StackSize = rawStack.StackSize / rawStack.Collectible.CombustibleProps.SmeltedRatio;
+										ItemStack rawStack = slot.Itemstack;
+										CombustibleProperties combustibleProps = rawStack.Collectible.CombustibleProps;
+										ItemStack itemStack;
+										if (combustibleProps == null)
+										{
+											itemStack = null;
+										}
+										else
+										{
+											JsonItemStack smeltedStack = combustibleProps.SmeltedStack;
+											itemStack = (smeltedStack != null) ? smeltedStack.ResolvedItemstack : null;
+										}
+										ItemStack firedStack = itemStack;
+										if (firedStack != null)
+										{
+											slot.Itemstack = firedStack.Clone();
+											slot.Itemstack.StackSize = rawStack.StackSize / rawStack.Collectible.CombustibleProps.SmeltedRatio;
+										}
 									}
 								}
+								beg.MarkDirty(true, null);
 							}
-							beg.MarkDirty(true, null);
-                        }
+						}
 					}
                 }
 				this.processComplete = true;
