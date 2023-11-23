@@ -1,3 +1,8 @@
+### v1.5.1
+
+* Allow iron doors on big kiln of any door orientation
+* Fix big kiln not firing all interior spaces
+
 ### v1.5.0
 
 * Refactor block entity logic to support small and large kilns
